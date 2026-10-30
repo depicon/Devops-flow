@@ -1,0 +1,3 @@
+include: external.yml
+compile:
+  script: echo "Fixture incomplète, ne pas exécuter"

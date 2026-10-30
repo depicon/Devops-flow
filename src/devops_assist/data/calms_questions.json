@@ -1,0 +1,30 @@
+{
+  "version": "calms-v1",
+  "dimensions": [
+    {"id": "C", "label": "Culture", "questions": [
+      {"id": "C1", "text": "Les décisions entre développement et opérations sont-elles partagées ?"},
+      {"id": "C2", "text": "Les responsabilités de chacun sont-elles clairement définies ?"},
+      {"id": "C3", "text": "Les incidents sont-ils discutés sans recherche de blâme ?"}
+    ]},
+    {"id": "A", "label": "Automation", "questions": [
+      {"id": "A1", "text": "La construction du logiciel (build) est-elle automatisée ?"},
+      {"id": "A2", "text": "Les tests sont-ils automatisés ?"},
+      {"id": "A3", "text": "Les déploiements sont-ils reproductibles ?"}
+    ]},
+    {"id": "L", "label": "Lean", "questions": [
+      {"id": "L1", "text": "Les changements sont-ils livrés en petits lots ?"},
+      {"id": "L2", "text": "Les changements font-ils l'objet d'une revue de code ?"},
+      {"id": "L3", "text": "Les blocages du travail sont-ils suivis ?"}
+    ]},
+    {"id": "M", "label": "Measurement", "questions": [
+      {"id": "M1", "text": "Des métriques utiles à l'équipe sont-elles suivies ?"},
+      {"id": "M2", "text": "L'équipe dispose-t-elle de journaux (logs) exploitables ?"},
+      {"id": "M3", "text": "Les effets des actions prises après les incidents sont-ils mesurés ?"}
+    ]},
+    {"id": "S", "label": "Sharing", "questions": [
+      {"id": "S1", "text": "Les procédures utiles sont-elles documentées ?"},
+      {"id": "S2", "text": "Le partage de connaissances est-il organisé ?"},
+      {"id": "S3", "text": "Les retours d'expérience sont-ils partagés avec l'équipe ?"}
+    ]}
+  ]
+}

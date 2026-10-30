@@ -1,0 +1,40 @@
+{
+  "version": "recommendations-v1",
+  "rules": {
+    "CAL-C": {
+      "risk": {"title": "Clarifier les responsabilités et organiser un retour d'expérience", "description": "Choisir un incident fictif ou passé, expliciter les responsabilités partagées et convenir d'une revue sans recherche de blâme.", "impact": 2, "effort": 2, "severity": null},
+      "verify": "Compléter les réponses de la dimension Culture"
+    },
+    "CAL-A": {
+      "risk": {"title": "Choisir une automatisation reproductible", "description": "Choisir un build, un test ou un déploiement et décrire une première automatisation reproductible à vérifier avec l'équipe.", "impact": 2, "effort": 2, "severity": null},
+      "verify": "Compléter les réponses de la dimension Automation"
+    },
+    "CAL-L": {
+      "risk": {"title": "Réduire un lot de travail et suivre les blocages", "description": "Découper un changement en petites étapes, organiser sa revue et rendre les blocages visibles.", "impact": 2, "effort": 2, "severity": null},
+      "verify": "Compléter les réponses de la dimension Lean"
+    },
+    "CAL-M": {
+      "risk": {"title": "Choisir une métrique et sa revue", "description": "Définir une métrique utile, son mode de collecte et un rendez-vous pour discuter des résultats.", "impact": 2, "effort": 2, "severity": null},
+      "verify": "Compléter les réponses de la dimension Measurement"
+    },
+    "CAL-S": {
+      "risk": {"title": "Rédiger et partager une procédure", "description": "Documenter une opération courante et faire relire puis essayer la procédure par une autre personne.", "impact": 2, "effort": 2, "severity": null},
+      "verify": "Compléter les réponses de la dimension Sharing"
+    },
+    "DOC-001": {"verify": "Vérifier le besoin de conteneuriser et l'emplacement du Dockerfile"},
+    "DOC-002": {
+      "risk": {"title": "Choisir une référence d'image versionnée adaptée", "description": "Vérifier les contraintes du projet puis remplacer le tag latest explicite par une référence adaptée. Un autre tag ne garantit pas l'immuabilité.", "impact": 2, "effort": 1, "severity": "modérée"},
+      "verify": "Vérifier les références d'image dans le Dockerfile"
+    },
+    "DOC-003": {
+      "risk": {"title": "Vérifier l'utilisateur effectif et préciser un compte adapté", "description": "Vérifier l'utilisateur hérité et celui du lancement, puis expliciter un compte adapté si nécessaire. Aucun utilisateur root effectif n'est prouvé ici.", "impact": 2, "effort": 1, "severity": "modérée"},
+      "verify": "Vérifier la déclaration de l'utilisateur du dernier stage"
+    },
+    "CMP-001": {
+      "risk": {"title": "Vérifier puis retirer les privilèges inutiles", "description": "Examiner le besoin du mode privilégié explicitement déclaré ; retirer les privilèges inutiles après validation du contexte.", "impact": 3, "effort": 1, "severity": "élevée"},
+      "verify": "Vérifier la configuration des privilèges Compose"
+    },
+    "CI-001": {"verify": "Vérifier où la CI est définie et quel fournisseur est utilisé"},
+    "CI-002": {"verify": "Vérifier les tests et leur exécution réelle dans la CI"}
+  }
+}

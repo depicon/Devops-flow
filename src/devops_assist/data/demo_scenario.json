@@ -1,0 +1,12 @@
+{
+  "version": "demo-v1",
+  "name": "Démo fictive — équipe Atelier",
+  "description": "Scénario entièrement fictif. Une équipe déclare des tests systématiques, mais les indices CI restent à confirmer. Configurations synthétiques à analyser uniquement, jamais à exécuter.",
+  "answers": {
+    "C1": 0, "C2": 1, "C3": 1,
+    "A1": 3, "A2": 3, "A3": 3,
+    "L1": 1, "L2": 1, "L3": 1,
+    "M1": 3, "M2": 0, "M3": "unknown",
+    "S1": "unknown", "S2": "unknown", "S3": "unknown"
+  }
+}

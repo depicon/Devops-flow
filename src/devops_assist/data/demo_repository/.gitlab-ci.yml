@@ -1,0 +1,4 @@
+# Configuration fictive à analyser uniquement ; aucun include n'est résolu.
+include: external.yml
+compile:
+  script: echo "Scénario fictif, ne pas exécuter"

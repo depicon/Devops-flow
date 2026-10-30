@@ -1,0 +1,5 @@
+# Configuration fictive à analyser uniquement ; ne pas démarrer.
+services:
+  atelier:
+    image: example:latest
+    privileged: true

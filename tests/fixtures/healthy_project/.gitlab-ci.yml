@@ -1,0 +1,4 @@
+stages: [test]
+unit:
+  stage: test
+  script: echo "Fixture uniquement, ne pas exécuter"

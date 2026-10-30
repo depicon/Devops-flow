@@ -1,0 +1,4 @@
+services:
+  demo:
+    image: example:1.0
+    privileged: false
