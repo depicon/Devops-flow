@@ -4,8 +4,8 @@ import sqlite3
 
 import pytest
 
-from devops_assist.db import ProjectStore
-from devops_assist.diagnostic import build_diagnostic
+from devops_flow.db import ProjectStore
+from devops_flow.diagnostic import build_diagnostic
 
 
 def counts(path):
@@ -53,7 +53,7 @@ def test_new_submission_preserves_previous_snapshot_and_isolates_projects(store,
     assert store.get_diagnostic(other.id, original.id) is None
     with pytest.raises(ValueError, match="autre projet"):
         store.save_diagnostic(other.id, "one", build_diagnostic(answers={}))
-    import devops_assist.diagnostic as diagnostic
+    import devops_flow.diagnostic as diagnostic
     def forbidden(*args, **kwargs):
         raise AssertionError("Recalcul interdit à la lecture")
     monkeypatch.setattr(diagnostic, "calculate_scores", forbidden)

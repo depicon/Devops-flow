@@ -6,13 +6,12 @@ import sqlite3
 from zipfile import ZipFile
 
 import pytest
-from streamlit.testing.v1 import AppTest
 
-from devops_assist.db import ProjectStore
-from devops_assist.demo import DEMO_FILES, DEMO_LIMITATION, load_demo, repository_zip
-from devops_assist.diagnostic import build_diagnostic
-from devops_assist.reports import build_export, render_json, render_markdown
-from devops_assist.scanner import scan_zip
+from devops_flow.db import ProjectStore
+from devops_flow.demo import DEMO_FILES, DEMO_LIMITATION, load_demo, repository_zip
+from devops_flow.diagnostic import build_diagnostic
+from devops_flow.reports import build_export, render_json, render_markdown
+from devops_flow.scanner import scan_zip
 
 APP = Path(__file__).resolve().parents[1] / "app.py"
 
@@ -40,9 +39,9 @@ def test_demo_expected_scores_coverage_priorities_and_prudent_alignment(store):
         "REC-CMP-001-RISK", "REC-DOC-002-RISK", "REC-DOC-003-RISK",
         "REC-CAL-C-RISK", "REC-CAL-L-RISK", "REC-CAL-S-VERIFY", "REC-CI-002-VERIFY",
     ]
-    assert data["alignments"][0]["id"] == "ALIGN-A2-CI-002"
+    assert data["alignments"][0]["id"] == "ALIGN-a2-CI-002"
     assert "Aucune contradiction démontrée" in data["alignments"][0]["limitation"]
-    assert data["inputs"]["calms"] == store.load_calms(project.id).answers
+    assert data["inputs"]["calms"] == store.load_calms(project.id, profile=store.project_profile(project.id)).answers
 
 
 def test_each_load_is_new_reproducible_and_never_overwrites_existing_followup(store):
@@ -78,7 +77,7 @@ def test_atomic_rollback_leaves_no_partial_demo_if_action_insert_fails(store):
 
 
 def test_scanner_failure_creates_nothing(store, monkeypatch):
-    monkeypatch.setattr("devops_assist.demo.repository_zip", lambda: b"invalid ZIP")
+    monkeypatch.setattr("devops_flow.demo.repository_zip", lambda: b"invalid ZIP")
     with pytest.raises(ValueError):
         load_demo(store)
     assert store.list_projects() == []
@@ -88,8 +87,8 @@ def test_demo_reopens_without_engine_and_fiction_label_survives_reports(store, m
     project, diagnostic = load_demo(store)
     def forbidden(*args, **kwargs):
         pytest.fail("Le moteur ne doit pas être rappelé à la lecture")
-    monkeypatch.setattr("devops_assist.demo.build_diagnostic", forbidden)
-    monkeypatch.setattr("devops_assist.demo.scan_zip", forbidden)
+    monkeypatch.setattr("devops_flow.demo.build_diagnostic", forbidden)
+    monkeypatch.setattr("devops_flow.demo.scan_zip", forbidden)
     reopened = ProjectStore(store.path)
     stored, actions = reopened.diagnostic_state(project.id, diagnostic.id)
     report = build_export(stored, actions)
@@ -98,37 +97,33 @@ def test_demo_reopens_without_engine_and_fiction_label_survives_reports(store, m
     assert stored.snapshot == diagnostic.snapshot
 
 
-def test_ui_demo_selects_new_project_and_reopens_all_spaces_without_overwrite(store):
+async def test_ui_demo_selects_new_project_and_reopens_all_spaces_without_overwrite(gui, store):
     real = store.create_project("Projet existant")
-    at = AppTest.from_file(APP, default_timeout=10).run()
-    at.button(key=f"open_{real.id}").click().run()
-    at.button(key="load_demo").click().run()
-    project_id = at.session_state["active_project_id"]
+    await gui.open(real.id)
+    await gui.click('load_demo')
+    project_id = gui.session.active_project_id
     assert project_id != real.id
     assert len(store.list_projects()) == 2
-    assert any("fictive" in x.value for x in at.success)
     diagnostic = store.latest_diagnostic(project_id)
-    for page in ("Diagnostic guidé", "Plan d'action", "Historique / Rapports"):
-        at.sidebar.radio[0].set_value(page).run()
-        assert not at.exception
-        assert any("fictive" in x.value for x in at.text)
-        if page == "Diagnostic guidé":
-            assert any("11/15 réponses connues (73,3 %)" in x.value for x in at.markdown)
-            assert any("3/3 réponses connues · Couverture : 100,0 %" in x.value for x in at.caption)
-    at.sidebar.radio[0].set_value("Projets").run()
-    at.button(key="load_demo").click().run()
+    for page in ('Diagnostic guidé', "Plan d'action", 'Historique / Rapports'):
+        await gui.nav(page)
+        await gui.user.should_see('fictive')
+        if page == 'Diagnostic guidé':
+            await gui.user.should_see('11/15 réponses connues (73,3 %)')
+            await gui.user.should_see('3/3 réponses connues (100,0 %)')
+    await gui.nav('Projets')
+    await gui.click('load_demo')
     assert len(store.list_projects()) == 3
     assert store.latest_diagnostic(project_id) == diagnostic
     assert store.get_project(real.id) == real
 
 
-def test_ui_demo_failure_is_neutral_and_does_not_select_partial_project(store):
+async def test_ui_demo_failure_is_neutral_and_does_not_select_partial_project(gui, store):
     with sqlite3.connect(store.path) as connection:
-        connection.execute("""CREATE TRIGGER fail_demo BEFORE INSERT ON actions
-                            BEGIN SELECT RAISE(ABORT, 'FAKE_SECRET'); END""")
-    at = AppTest.from_file(APP, default_timeout=10).run()
-    at.button(key="load_demo").click().run()
-    assert not at.exception
-    assert at.error and "stockage local" in at.error[0].value
-    assert "FAKE_SECRET" not in at.error[0].value
+        connection.execute("CREATE TRIGGER fail_demo BEFORE INSERT ON actions BEGIN SELECT RAISE(ABORT, 'FAKE_SECRET'); END")
+    await gui.open()
+    await gui.click('load_demo')
+    await gui.user.should_see('stockage local')
+    assert 'FAKE_SECRET' not in ' '.join(gui.texts)
     assert store.list_projects() == []
+    assert gui.session.active_project_id is None

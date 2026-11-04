@@ -3,22 +3,26 @@ requires = ["setuptools>=75"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "devops-assist"
+name = "devops-flow"
 version = "0.1.0"
 description = "Plateforme locale d'accompagnement DevOps avec interface graphique."
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = ["streamlit>=1.50,<2", "PyYAML>=6.0.2,<7"]
+dependencies = ["nicegui==3.18.0", "PyYAML>=6.0.2,<7", "python-gitlab>=8.6,<9", "requests>=2.32.5,<3", "httpx>=0.28,<1", "python-dotenv>=1.2,<2"]
 
 [project.optional-dependencies]
-dev = ["pytest>=8,<10"]
+dev = ["pytest>=8.4,<10", "pytest-asyncio>=1,<2"]
+pdf = ["playwright>=1.55,<2", "WeasyPrint>=68,<71"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.setuptools.package-data]
-devops_assist = ["data/*.json", "data/demo_repository/Dockerfile", "data/demo_repository/compose.yaml", "data/demo_repository/.gitlab-ci.yml"]
+devops_flow = ["data/*.json", "data/demo_repository/Dockerfile", "data/demo_repository/compose.yaml", "data/demo_repository/.gitlab-ci.yml"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra"
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+main_file = "app.py"

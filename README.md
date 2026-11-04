@@ -1,137 +1,308 @@
-# DevOps Assist
+# devops-flow
 
-Application web locale d'accompagnement à l'amélioration DevOps, réalisée dans le cadre d'un Master 2. Interface en français, logique métier indépendante de la GUI, données conservées dans SQLite.
+Évaluez les pratiques DevOps de votre équipe, confrontez vos réponses à des indices techniques et suivez les actions prioritaires. L’application fonctionne sur votre machine, en français, avec une base SQLite locale. Aucun compte ni service distant n’est nécessaire à l’usage.
 
-**État au 2026-10-30 : MVP local fonctionnel sous Linux, P0–P6 achevés et trois défauts d'audit corrigés.** Suite actuelle : **423 tests et 6 sous-tests réussis**. Navigation/source du scan, analyse Compose partielle et rejet des chemins ZIP profonds vérifiés dans Chrome avec vrais uploads. L'installation neuve et la recette complète P6 datent du 2026-10-20 ; elles n'ont pas été répétées pour ces corrections ciblées. Démo fictive embarquée disponible. Preuves et limites dans [TEST_RESULTS](context/TEST_RESULTS.md). Cette recette technique ne constitue pas une validation scientifique du barème CALMS. Windows/macOS n'ont pas été testés.
+## Installer et lancer
 
-## Disponible dans le code
-
-- Créer un projet avec nom obligatoire (120 caractères maximum) et description facultative (2 000 caractères maximum).
-- Lister les projets, ouvrir une fiche et retrouver les données depuis SQLite après relance. Deux projets peuvent porter le même nom ; ils ont des identifiants distincts.
-- Naviguer entre Projets, Diagnostic guidé, Plan d’action et Historique / Rapports.
-- Dans Diagnostic guidé, répondre aux 15 questions CALMS, ajouter des notes facultatives, enregistrer et reprendre le questionnaire du projet, consulter les cinq scores et leur couverture.
-- Analyser un ZIP ou un dossier local en lecture seule ; consulter six contrôles et leurs preuves sans contenu brut.
-- Finaliser un diagnostic CALMS seul, scan seul ou combiné ; consulter onze constats filtrables, les rapprochements et les recommandations classées par impact/effort. Retrouver le dernier diagnostic enregistré après relance.
-- Suivre séparément les actions de chaque diagnostic : statut, commentaire local, ordre et dates persistantes.
-- Rouvrir plusieurs diagnostics historiques sans scan ni recalcul ; prévisualiser et télécharger Markdown/JSON depuis le même état daté.
-
-Aucun service IA externe n’est nécessaire.
-
-## Essayer la démo fictive
-
-Dans **Projets**, cliquer sur **Charger une démo**. Un nouveau projet « Démo fictive — équipe Atelier », son questionnaire et son diagnostic sont enregistrés ensemble. Chaque chargement crée un projet distinct ; aucun projet, diagnostic ou suivi existant n'est remplacé. Ouvrir ensuite **Diagnostic guidé**, **Plan d'action** ou **Historique / Rapports**. La mention fictive reste dans les résultats et les rapports.
-
-Le scénario `demo-v1` est embarqué dans le package, sans accès à un dépôt réel ni dépendance à `tests/`. Scores attendus : Culture **22,2**, Automation **100**, Lean **33,3**, Measurement **50** avec couverture **2/3**, Sharing **indéterminé** avec couverture **0/3**. La couverture totale est **11/15**. Les indices ciblés signalent `latest`, USER final non explicite et privilèges ; le job de test reste à confirmer. L'action `REC-CMP-001-RISK` est prioritaire. Une déclaration de tests systématisés est rapprochée prudemment des indices CI, sans modifier le score Automation.
-
-Pour essayer l'import, **Télécharger le ZIP fictif**, ouvrir un projet puis **Diagnostic guidé → Archive ZIP**, choisir ce fichier et **Analyser le dépôt**. Le chargement de démo n'enregistre pas de scan temporaire dans la session : il faut analyser le ZIP pour finaliser volontairement un autre diagnostic technique ou combiné. Ces configurations sont des données synthétiques à analyser, jamais à exécuter.
-
-## Utiliser CALMS
-
-Créer ou ouvrir un projet, puis choisir **Diagnostic guidé**. Remplir les cinq onglets (Culture, Automation, Lean, Measurement, Sharing) et cliquer sur **Enregistrer et calculer**. Les notes sont facultatives, limitées à 2 000 caractères par question et conservées localement. Après relance, ouvrir le même projet et revenir au questionnaire pour retrouver réponses, notes et résultats.
-
-L'échelle va de 0 (absent) à 3 (systématisé), avec « Inconnu » par défaut. Le score porte uniquement sur les réponses connues ; la couverture indique combien des trois questions de la dimension sont renseignées. Exemple : `3, 0, inconnu` donne un score de **50/100** avec une couverture de **2/3**. Sans réponse connue, le score est **Indéterminé**, jamais zéro. Un score peu couvert est signalé comme insuffisant pour interpréter la dimension.
-
-Les résultats affichés sont ceux de la dernière sauvegarde. Une modification non enregistrée ne change pas ces résultats. Un nouvel enregistrement remplace le questionnaire courant du projet et préserve les diagnostics déjà finalisés. Le questionnaire `calms-v1` et ses interprétations sont des conventions internes proposées, sans score global ni certification officielle.
-
-## Finaliser un diagnostic
-
-Dans **Diagnostic guidé**, après CALMS et/ou le scan, choisir les sources à inclure puis cliquer sur **Finaliser et sauvegarder**. Seules les réponses déjà enregistrées sont utilisées. Décocher une source permet de la passer ; passer les deux est refusé. Un questionnaire tout inconnu reste une source admissible, avec cinq scores indéterminés et uniquement des demandes de complément. Un scan refusé ne devient jamais une preuve de configuration manquante.
-
-Le diagnostic enregistre les réponses normalisées, scores, onze constats, versions, rapprochements et recommandations. Les notes restent dans le brouillon local ; elles ne sont pas copiées dans le snapshot. Chaque fiche montre source, statut, preuve contrôlée, limite, gravité éventuelle et lien vers l'action. Les filtres de statut/source changent l'affichage uniquement. Les écarts déclaratifs/indices donnent une explication prudente, sans malus CALMS ni contradiction affirmée.
-
-Les actions sont classées par impact/effort décroissant puis identifiant croissant : privilèges explicitement déclarés (3), vérifications Docker ciblées sur un risque (2), amélioration CALMS suffisamment couverte (1) et information à confirmer (1). Une information inconnue n'a pas de gravité technique établie. Aucune dépendance automatique n'est ajoutée. Ces conventions pédagogiques restent proposées.
-
-Une double pression avec les mêmes sources dans la même session réutilise la clé de soumission. **Préparer une nouvelle soumission** permet de créer volontairement un autre diagnostic avec les mêmes données ; changer les données puis finaliser crée aussi une nouvelle soumission. Le dernier diagnostic est relu après redémarrage sans rescanner ni recalculer. Une nouvelle session de finalisation constitue une nouvelle soumission volontaire. Les diagnostics précédents sont sélectionnables dans Plan d’action et Historique / Rapports ; leur suivi reste distinct.
-
-**Vérification reproductible des diagnostics (exercée en P6) :** finaliser CALMS seul, scan seul puis combiné ; vérifier les fiches et filtres, le lien déclaration/indices avec A2=3 et `incomplete_project`, la priorité CMP-001 en tête, la double pression sans doublon, puis relancer et retrouver le dernier diagnostic. Décocher les deux sources doit refuser la finalisation. Le parcours Chrome et les assertions AppTest sont documentés séparément dans TEST_RESULTS.
-
-## Suivre les actions et exporter
-
-Dans **Plan d’action**, sélectionner le diagnostic enregistré. Les recommandations commencent dans l’ordre de priorité initial ; **Monter** et **Descendre** modifient l’ordre de suivi sans changer cette priorité. Choisir **À faire**, **En cours**, **Terminée** ou **Écartée**, saisir un commentaire facultatif (2 000 caractères maximum), puis **Enregistrer le suivi**. Enregistrer le formulaire avant de déplacer une action. Les dates de création sont conservées, les dates de mise à jour suivent les modifications réelles. Le suivi ne change jamais les scores CALMS ni les recommandations figées ; deux diagnostics du même projet ont des actions distinctes.
-
-Dans **Historique / Rapports**, sélectionner un ancien diagnostic pour consulter ses résultats et versions sans relancer le scanner ou le moteur. Les aperçus Markdown/JSON et les deux boutons **Télécharger** partagent un seul objet `report-v1`, daté en UTC. Les actions y suivent l’ordre choisi ; les recommandations gardent leur priorité d’origine. Un changement du suivi actualise l’objet automatiquement ; **Actualiser la date du rapport** renouvelle explicitement sa date. Une ancienne version de snapshot inconnue est signalée sans empêcher de sélectionner un autre diagnostic lisible.
-
-Les rapports comprennent les identifiants projet/diagnostic, dates, versions, réponses numériques/inconnues, scores et couvertures, constats/preuves contrôlées, rapprochements, limites, recommandations et état des actions. Les noms/descriptions de projet, notes CALMS, commentaires, noms d’archives, chemins, noms libres de jobs/services et contenus bruts sont exclus. Les commentaires restent disponibles dans le formulaire local. Les noms des fichiers téléchargés n’utilisent que les identifiants.
-
-**Recette manuelle P5 reproductible :** créer deux diagnostics du même projet, ouvrir Plan d’action, essayer les quatre statuts et un commentaire, changer l’ordre, relancer puis rouvrir le projet. Vérifier que le suivi est conservé, les scores inchangés et l’autre diagnostic indépendant. Dans Historique / Rapports, rouvrir chaque résultat puis télécharger les deux formats : même date, même ordre et statuts, accents lisibles, aucun texte libre exclu. La vérification navigateur effectivement observée et ses limites sont consignées dans TEST_RESULTS.
-
-## Analyser des configurations
-
-Dans **Diagnostic guidé**, descendre à **Scan technique ciblé**, choisir **Archive ZIP** ou **Dossier local**, fournir la source puis cliquer sur **Analyser le dépôt**. Le questionnaire peut rester non renseigné. Sous Linux, les deux fixtures de `tests/fixtures/` peuvent être analysées directement par leur chemin ; elles sont fictives et ne doivent pas être exécutées.
-
-Seuls `Dockerfile`, `compose.yaml`, `compose.yml`, `docker-compose.yaml`, `docker-compose.yml` et `.gitlab-ci.yml` sont lus à la racine supportée. Le ZIP peut avoir un dossier enveloppe unique. Les autres contenus, dont `.env`, clés et `.git/`, ne sont pas ouverts ; aucun ZIP n'est extrait. Le dossier local n'est pas parcouru récursivement. Aucun code, build, script ou include distant n'est exécuté.
-
-Bornes : ZIP reçu ≤10 Mio et ≤1 000 entrées, noms ≤1 024 octets UTF-8 (slash final compris) et ≤32 composants (slash final exclu du comptage), tailles annoncées ≤20 Mio cumulés et ≤1 Mio par fichier, ratio de compression ≤100, lecture réelle ≤1 Mio par configuration et ≤6 Mio au total. Les noms et métadonnées de toutes les entrées ZIP sont contrôlés, même pour les fichiers ignorés, avant toute ouverture de contenu. Les liens, chemins suspects, doublons, entrées chiffrées/spéciales et budgets dépassés rejettent l'analyse entière. Le scan local refuse les liens et requiert les primitives de protection essayées sous Linux ; il est refusé lorsqu'elles sont indisponibles. Windows/macOS ne sont pas vérifiés pour ce scan.
-
-Les six contrôles recherchent : Dockerfile, tag `latest` explicite, instruction `USER` du dernier stage, booléen Compose `privileged: true`, fichier GitLab CI et job local de test identifiable. Les statuts distinguent indice observé, point à vérifier, non observé, à confirmer, non analysable et non applicable. Un fichier absent de ce périmètre ne prouve pas l'absence d'une pratique. GitLab CI reste provisoire ; aucune conclusion sur les autres fournisseurs.
-
-Le parsing est limité : pas de validation complète Docker/Compose/GitLab, pas de résolution d'héritage/includes/fusion. Docker : commentaires, continuations antislash et stages pris en charge ; heredocs et échappement backtick restent à confirmer. YAML : UTF-8, profondeur ≤32, ≤10 000 nœuds, clés uniques textuelles ; tous les alias sont refusés en V1, même non récursifs. `privileged: "true"` est non analysable ; seul un booléen est interprété (résolution YAML 1.1 de PyYAML). Un `privileged: true` explicite reste signalé si un autre service est invalide, avec preuve d'analyse partielle ; cela n'établit pas le fonctionnement réel du service. Les variantes Compose restent indépendantes.
-
-Le résultat `scanner-v2`/`rules-v2` est temporaire et isolé par projet dans la session jusqu'à finalisation explicite du diagnostic. La navigation conserve le mode, le chemin local et le résultat ; la source du dernier scan est affichée. Après retour à la page, un ZIP doit être sélectionné à nouveau pour relancer son analyse ; le dernier résultat reste finalisable. Changer de source/chemin/archive ou relancer l'analyse efface le résultat avant traitement ; une entrée rejetée ne laisse pas l'ancien résultat temporaire affiché. Refaire le scan si les fichiers ont changé. Les diagnostics déjà finalisés, y compris les versions v1, restent conservés et relus sans recalcul ; les exports portent sur les résultats finalisés et le suivi courant.
-
-**Vérification reproductible du scan (exercée en P6) :** démarrer localement avec la commande ci-dessous, créer/ouvrir un projet, analyser `tests/fixtures/healthy_project`, puis `incomplete_project`. Attendus : six indices observés pour le premier ; `latest`, USER non explicite dans le dernier stage et privilèges à vérifier, job de test à confirmer pour le second. Importer ensuite ces mêmes fichiers dans un ZIP direct et dans un dossier enveloppe ; vérifier les mêmes constats. Essayer un ZIP invalide : message neutre et disparition du résultat précédent. AppTest exerce le service et les widgets simulés ; en P6, Chrome a réellement envoyé les ZIP direct/enveloppe et une archive hostile rejetée.
-
-## Installation Linux
-
-Ouvrir un terminal **à la racine de ce dossier**, avec Python >= 3.11 et un accès au dépôt de paquets pour la première installation :
+Python ≥3.11 est requis. Sous Linux, ouvrir un terminal à la racine du projet :
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-python -m pip install -e '.[dev]'
-python -m pytest -q
-python -m streamlit run app.py --server.address 127.0.0.1
+python -m pip install -e .
+python app.py
 ```
 
-Puis ouvrir `http://127.0.0.1:8501` dans un navigateur. Arrêter avec `Ctrl+C`. À la prochaine utilisation, activer le même environnement et relancer la dernière commande ; aucune réinstallation n'est nécessaire tant que les dépendances ne changent pas.
+Ouvrir [devops-flow en local](http://127.0.0.1:8501). Arrêter avec `Ctrl+C`.
+Pour les utilisations suivantes, activer le même environnement et relancer la dernière commande.
+L’installation initiale nécessite un accès au dépôt de paquets. Le scan distant nécessite un accès Internet ; l’interface et les données restent locales.
 
-Une installation neuve dans un environnement virtuel isolé, depuis une copie propre des sources, a réussi sous Linux avec Python 3.13.5, Streamlit 1.66.0, pytest 9.1.1 et PyYAML 6.0.3. La suite y donne **380 tests et 6 sous-tests réussis** ; `python -m pip check` réussit. Le téléchargement des dépendances a nécessité une autorisation réseau hors sandbox. macOS n'a pas été essayé ; le scan local refuse les plateformes sans les primitives de protection requises.
-
-## Installation Windows — PowerShell
-
-Ces commandes sont fournies pour un poste équipé de Python >= 3.11 ; **Windows n'a pas été testé**. Elles utilisent directement l'interpréteur de l'environnement virtuel, sans modifier la politique d'exécution PowerShell :
+Sous Windows, les commandes suivantes sont proposées mais **n’ont pas été vérifiées** :
 
 ```powershell
 py -3 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -e '.[dev]'
-.\.venv\Scripts\python.exe -m pytest -q
-.\.venv\Scripts\python.exe -m streamlit run app.py --server.address 127.0.0.1
+.\.venv\Scripts\python.exe -m pip install -e .
+.\.venv\Scripts\python.exe app.py
 ```
 
-Ouvrir ensuite `http://127.0.0.1:8501`. Après un arrêt, relancer la dernière commande à la racine du dossier.
+Linux est le seul environnement actuellement vérifié. Le scan d’un dossier local est refusé si les primitives de protection requises sont indisponibles ; les autres systèmes restent à vérifier.
 
-## Données et configuration
+## Commencer un diagnostic
 
-La base est créée au premier lancement dans `var/devops_assist.sqlite3`, sous la racine de l'application. Elle est exclue du versionnement. Après redémarrage, ouvrir le projet depuis la liste ; la sélection active dans la GUI est propre à la session.
+1. Dans **Projets**, créer un projet ou ouvrir un projet enregistré. Pour découvrir les fonctions, utiliser **Charger une démo** : un nouveau projet fictif est créé sans écraser les autres.
+2. Choisir **Préparer le diagnostic**. Dans **1. Préparer**, choisir pratiques, dépôt ou les deux et suivre **Votre prochaine action**.
+3. Dans **2. Questionnaire**, décrire les pratiques puis cliquer sur **Enregistrer le questionnaire**. Dans **3. Dépôt**, choisir un ZIP, un dossier local ou un dépôt distant, puis **Analyser le dépôt**.
+4. Dans **4. Résultats**, vérifier les sources puis **Créer le diagnostic**. Un questionnaire enregistré, une analyse du dépôt ou les deux suffisent.
+5. Consulter les constats, puis **Suivre les actions** ou **Consulter les rapports**.
 
-La GUI lit uniquement les configurations ciblées lors d'une analyse demandée et n'exécute aucun dépôt. Les saisies libres sont affichées comme du texte, sans interprétation Markdown/HTML. Ne pas enregistrer de secrets dans le contexte du projet. Les preuves du scan ne contiennent que noms autorisés, codes et numéros de ligne fiables éventuels.
+Un questionnaire entièrement « Je ne sais pas » est admissible : ses scores sont indéterminés et sa couverture est nulle. Un scan sans fichier ciblé peut être admissible avec des indices « Non observé ». Un import rejeté ne constitue pas une source. Sans source sélectionnée et disponible, la finalisation est refusée.
 
-Le fichier [.streamlit/config.toml](.streamlit/config.toml) fixe l'adresse locale `127.0.0.1`, désactive la télémétrie et le service de fichiers statiques. Lancer depuis la racine pour charger cette configuration. La commande de lancement précise aussi l'adresse locale.
+![Espace Projets](docs/screenshots/projets.png)
 
-Pour les tests ou une base locale distincte, la variable `DEVOPS_ASSIST_DB_PATH` permet de choisir un autre fichier. Sans cette variable, le chemin ci-dessus est utilisé. La configuration n'exige aucun compte ni service distant.
+## Suivre les actions
 
-## Tests et vérification
+Dans **Plan d’action**, sélectionner le diagnostic. La synthèse compte les actions **À faire**, **En cours**, **Terminée** et **Écartée**. Modifier un statut ou un commentaire, puis **Enregistrer le suivi** ; une confirmation apparaît après l’enregistrement.
 
-La suite complète est `python -m pytest -q` : **423 tests et 6 sous-tests réussis**, dont 49 cas GUI AppTest. Elle couvre projets, migration de l'ancienne base, questionnaire, scanner/règles et attaques, constats, priorités, transaction diagnostic/actions, soumissions concurrentes, reprise sans recalcul, suivi/ordre transactionnel, isolation des diagnostics et sécurité/cohérence des rapports. Les 43 cas ajoutés après audit couvrent aussi la navigation du scan, les services Compose partiellement invalides, les bornes et conflits des chemins ZIP et la relecture des versions historiques. Les preuves sont dans [TEST_RESULTS](context/TEST_RESULTS.md). Les tests utilisent des bases et sources temporaires ; la base utilisateur n'est pas utilisée. La recette Chrome P6 complète a réussi le 2026-10-20 depuis l'installation neuve, avec deux redémarrages réels et des transferts de fichiers effectifs. Le 2026-10-30, cinq contrôles Chrome ciblés ont vérifié les corrections avec de vrais uploads ZIP et relecture SQLite. Les pourcentages de couverture CALMS ont été corrigés pendant P6 (3/3 = 100 %, 2/3 = 66,7 %), sans changer les scores ni les données enregistrées.
+Utiliser **Monter** et **Descendre** pour réorganiser les actions. Enregistrer le formulaire avant un déplacement. L’ordre manuel ne change pas la priorité initiale, calculée par impact / effort décroissant, puis identifiant croissant en cas d’égalité. Les commentaires restent locaux, avec une limite de 2 000 caractères.
 
-Les tests SQLite peuvent aussi s'exécuter sans pytest ni Streamlit. Cette commande a effectivement réussi après installation locale du package sans ses dépendances :
+Chaque diagnostic possède son propre suivi. Modifier le brouillon, rescanner ou suivre une action ne recalcule pas les diagnostics déjà enregistrés.
+
+![Plan d’action](docs/screenshots/plan-action.png)
+
+## Consulter l’historique et exporter
+
+Dans **Historique / Rapports**, sélectionner un diagnostic, puis **Télécharger Markdown** ou **Télécharger JSON**. Les deux formats et leurs aperçus utilisent le même objet daté en UTC. Une modification du suivi actualise cet objet ; **Actualiser la date du rapport** renouvelle explicitement sa date.
+
+Les rapports comprennent les identifiants, dates, versions, réponses, scores et couvertures, constats, preuves contrôlées, recommandations et état des actions. Ils excluent les noms et descriptions des projets, notes CALMS, commentaires, chemins absolus, noms d’archives et contenus bruts. Les rapports report-v4 incluent l’architecture et les chemins relatifs validés ; les anciens formats conservent leur politique. Les fichiers portent uniquement les identifiants du projet et du diagnostic.
+
+![Historique et rapports](docs/screenshots/historique.png)
+
+## Comprendre les résultats
+
+- **Score CALMS** : indicateur déclaratif par dimension. Les réponses connues vont de 0 à 3 ; le score est leur somme divisée par trois fois leur nombre, ramenée sur 100. Les inconnus sont exclus. Aucun score global n’est calculé.
+- **Couverture** : proportion de réponses connues, distincte du score.
+- **Constat** : déclaration ou indice statique, accompagné de son origine et de ses limites. « Non observé » ne prouve pas l’absence d’une pratique ; « À confirmer » exprime une information insuffisante.
+- **Recommandation** : action reliée aux constats, avec impact, effort, priorité et justification. Les conventions de classement sont internes ; elles ne constituent pas une certification.
+
+Les onglets **Constats** et **Recommandations** séparent les observations des actions proposées. Les versions et limites restent accessibles dans une section repliable.
+
+![Diagnostic guidé](docs/screenshots/diagnostic.png)
+
+## Périmètre du scan
+
+Le scan ZIP/local indexe les manifests et les configurations Docker, Compose et GitLab CI dans les sous-dossiers, avec leurs chemins relatifs complets. Un manifest définit un composant (20 maximum, composants imbriqués compris). Les stacks Python, Node/TypeScript, Go, Java et Rust sont détectées par déclarations statiques. L’onglet **Architecture** montre les signaux, leur confiance, les fichiers et les références communes. Une stack manuelle se déclare dans **Déclarer ou corriger une stack**, puis exige une nouvelle analyse. Un ZIP peut contenir un dossier enveloppe unique ; il n’est jamais extrait. Le parcours local exclut les secrets, dépendances et sorties de build. Les seules lectures de code concernent au plus trois points d’entrée candidats par composant, 200 lignes et 64 Kio chacun, dans le budget global de 6 Mio.
+
+Six contrôles recherchent le Dockerfile, le tag `latest` explicite, l’instruction `USER` du dernier stage, les privilèges Compose, le fichier GitLab CI et un job local de test identifiable. GitLab CI reste le fournisseur provisoire ; aucune conclusion n’est établie sur les autres fournisseurs.
+
+Les fichiers de secrets, clés et `.git/` ne sont pas ouverts. Aucun code, build, script ou include distant n’est exécuté. Le dépôt analysé n’est jamais modifié. Les preuves ne contiennent pas le contenu brut des configurations.
+
+Limites ZIP : 10 Mio reçus, 1 000 entrées, noms de 1 024 octets UTF-8 et 32 composants maximum, 20 Mio décompressés annoncés au total, 1 Mio par fichier et ratio de compression de 100 maximum. Les lectures réelles sont bornées à 1 Mio par configuration et 6 Mio au total. Chemins suspects, liens, doublons et entrées chiffrées ou spéciales provoquent un refus. YAML : profondeur 32, 10 000 nœuds, clés textuelles uniques, aucun alias. Le parsing reste partiel et ne valide pas le fonctionnement réel d’une configuration.
+
+Le scan est temporaire et isolé par projet et par client navigateur. L’état de travail reste en mémoire. Seul le choix d’apparence est conservé dans le navigateur. Un rechargement complet ou un redémarrage repart d’une session vide : rouvrir le projet, puis relancer le scan si nécessaire. La navigation conserve sa source et son résultat. Le fichier ZIP reçu reste en mémoire jusqu’à l’analyse, au changement de source ou à la sortie de Diagnostic guidé, puis ses octets sont libérés. **Retirer le ZIP** permet aussi d’effacer une archive en attente avant analyse. Après un retour sur la page, sélectionner de nouveau le ZIP pour relancer l’analyse ; le résultat contrôlé précédent reste finalisable. Changer de source, de chemin ou d’archive invalide ce résultat. Refaire l’analyse si les fichiers ont changé.
+
+## Données locales et vérification
+
+L’interface utilise NiceGUI 3.18.0 et SQLite. La base est créée dans `var/devops_flow.sqlite3`. Après un redémarrage, rouvrir le projet dans la liste. Le projet actif et le scan temporaire dépendent de la session ; les projets, questionnaires enregistrés, diagnostics et suivis sont persistants. Deux projets peuvent avoir le même nom et des identifiants distincts.
+
+Pour une base distincte, définir `DEVOPS_FLOW_DB_PATH` avant le lancement. Lancer depuis la racine utilise la configuration locale du point d’entrée : `127.0.0.1:8501`, interface française, sans exposition distante de l’interface ni rechargement automatique.
+
+Les installations antérieures restent compatibles : `DEVOPS_ASSIST_DB_PATH` est
+utilisée si la nouvelle variable est vide ou absente. Sans configuration, la base
+`var/devops_flow.sqlite3` est prioritaire si elle existe ; sinon l’ancienne base
+`var/devops_assist.sqlite3` est réutilisée. Une installation neuve crée le nouveau
+fichier. Aucun fichier de données n’est déplacé ni supprimé automatiquement.
+
+Pour exécuter les tests avec des bases fictives isolées :
 
 ```bash
-python -m unittest discover -s tests -p test_db.py -v
+python -m pip install -e '.[dev]'
+python -m pytest -q
+python -m pip check
 ```
 
-En cas d'environnement hors réseau, cette dernière commande ne remplace pas les tests GUI. Les résultats actuels, les anciennes erreurs d'installation et les étapes de recette réellement observées sont détaillés dans [TEST_RESULTS](context/TEST_RESULTS.md).
+Les résultats, environnements et limites de recette sont consignés dans [TEST_RESULTS](context/TEST_RESULTS.md). Les critères V2 sont dans [ACCEPTANCE](context/ACCEPTANCE.md), l’état courant dans [STATE](context/STATE.md) et le périmètre dans [PRODUCT](context/PRODUCT.md).
 
-## Organisation et suite
+## Mise à jour depuis la version précédente
 
-- [PRODUCT](context/PRODUCT.md) : périmètre V1 et limites ; [ARCHITECTURE](context/ARCHITECTURE.md) : responsabilités et arborescence cible.
-- [PLAN](context/PLAN.md) : jalons ; [STATE](context/STATE.md) : état réel ; [JOURNAL](context/JOURNAL.md) : changements et vérifications.
-- [DECISIONS](context/DECISIONS.md) : statuts et questions ouvertes ; [RULES](context/RULES.md) : règles proposées ; [ACCEPTANCE](context/ACCEPTANCE.md) : critères du MVP complet.
+Arrêter l’application existante, puis installer les dépendances et relancer :
 
-Python, Streamlit et SQLite sont utilisés pour cette première implémentation, suivant la proposition DEC-009 ; cela ne constitue pas une validation historique rétroactive. GitLab CI, 15 questions, six contrôles techniques et les conventions de scoring restent proposés. Les questions CI, OS de référence définitif, barème et évaluation académique restent ouvertes.
+```bash
+.venv/bin/python -m pip install -e '.[dev]'
+.venv/bin/python app.py
+```
 
-P0–P6 sont achevés pour le MVP local sous Linux. Les trois défauts majeurs de l'[audit final](context/AUDIT.md) sont corrigés et couverts depuis le 2026-10-30 : source cohérente après navigation, signal Compose préservé parmi des services invalides et chemins ZIP bornés avec contrôle des conflits par composants. La prochaine étape dépend des besoins de l'utilisateur : préparer la démonstration et l'évaluation académique (justification du barème, témoins, protocole). Ces corrections ciblées ne valent pas nouvel audit exhaustif. Aucune extension fonctionnelle ni publication n'est lancée automatiquement.
+Pour passer de DevOps Assist à `devops-flow`, arrêter l’application puis exécuter
+`.venv/bin/python -m pip uninstall -y devops-assist` avant la réinstallation
+ci-dessus. Le lancement par module devient `python -m devops_flow` ; l’ancienne
+commande `python -m devops_assist` est remplacée. Le dossier du projet peut garder
+son nom actuel. Les préférences d’apparence du navigateur sont reprises.
 
-## Sources historiques
+Les formats de profils et marqueurs techniques Trello historiques sont conservés
+pour assurer la compatibilité. Les boards existants et les documents utilisateur
+ne sont pas renommés automatiquement.
 
-Les documents [Contexte vivant](https://docs.google.com/document/d/1WxKroy2ryE5tyHwbU93iiMuh-vORcDkUHvFAukxTQhM/edit) et [Spécification GUI v0.2](https://docs.google.com/document/d/1_6fEgdTB8PgDRCAP-EDtj8N5jMUM9aOFqXR6q3rNQ5M/edit) sont les sources Drive référencées par le kit initial. Aucune synchronisation automatique n'est réalisée. Les copies de `references/` restent en lecture seule.
+La base existante est réutilisée. Aucun diagnostic n’est recalculé ni converti.
+La réception ZIP vérifie aussi les limites côté serveur : un fichier de 10 Mio
+maximum, réception multipart bornée en mémoire, sans extraction ni fichier temporaire.
+
+## Profils d’évaluation
+
+Ouvrir **Profils d’évaluation**, sous **Projets**, pour créer un référentiel ou importer
+un fichier Markdown. Chaque profil définit 1 à 10 questions par dimension CALMS,
+les seuils d’interprétation, les règles techniques activées et leurs poids éventuels.
+Le référentiel de base `baseline` reprend les quinze questions et six règles initiales.
+
+À la création d’un projet, choisir son profil. Pour modifier ensuite le projet ou sa
+version utilisée, ouvrir **Réglages** près du nom du projet dans le bandeau supérieur. Le diagnostic
+utilise ce choix sans dérogation. Chaque version possède son propre brouillon CALMS :
+aucune réponse n’est transférée automatiquement à un autre questionnaire.
+
+Un profil publié est immuable. **Publier une nouvelle version** propose une confirmation
+avec les sections modifiées ; les projets restent sur leur version précédente jusqu’à
+une réassignation explicite. Les diagnostics et rapports historiques conservent leur
+référentiel et leurs conventions. Un profil utilisé par un projet ou diagnostic ne peut
+pas être supprimé ; un profil inutilisé peut être archivé. Baseline est protégé.
+
+Le bouton **Exporter en Markdown** permet de partager le référentiel comme fichier
+local, sans envoi automatique. L’import exige un `.md` UTF-8 de 256 Kio maximum, avec
+frontmatter YAML sûr, sans inclusion, alias ni entité HTML/XML. Un identifiant de profil existant permet
+une nouvelle version ou un autre identifiant. Voir [l’exemple complet](docs/examples/profile-example.md).
+
+Les conventions Markdown figurent dans les rapports et sont affichées sans images ni
+HTML actif. Elles décrivent les pratiques attendues ; elles ne créent pas de nouveaux
+contrôles techniques. Auteur, description, aides, notes et commentaires restent exclus
+des rapports. L’application reste locale, sans compte applicatif ; la lecture distante GitLab/GitHub reste à votre demande.
+
+Lancement également disponible : `python -m devops_flow`.
+
+## Vérifier le flux DevOps du projet
+
+Le **Flux DevOps**, dans Diagnostic guidé et Historique / Rapports, annote huit étapes
+du résultat figé : Code, Construction, Tests, Paquet, Déploiement, Exploitation,
+Observation et Retours. Les flèches représentent le flux attendu ; elles ne prouvent
+pas qu’un pipeline fonctionne. Les badges CALMS indiquent les dimensions concernées,
+avec Culture comme cadre transversal.
+
+Cliquer sur une étape ou utiliser **Étape ou service à vérifier** pour lire son statut,
+ses sources, ses preuves et leurs limites. **Voir le constat détaillé** ouvre la fiche
+du même diagnostic dans Diagnostic guidé, même depuis l’historique. La légende met
+en évidence les étapes du statut choisi ; recliquer annule la sélection. Le flux se
+fait défiler horizontalement, sans réduire les textes sur petit écran.
+
+Les types Compose reconnus sont affichés sans nom de service ni référence d’image.
+Un type non reconnu reste « Service externe (type non résolu) » ; aucun service actif
+n’est certifié. Les profils personnalisés restent à confirmer pour les questions sans
+mapping ; les règles désactivées sont justifiées par le **profil figé**. Les réponses
+baseline connues sont évaluées individuellement au seuil figé, sans modifier les scores
+ou constats CALMS par dimension.
+
+Les rapports `report-v3` historiques et `report-v4` multi-composants contiennent le même Mermaid que leur vue, dans un bloc de code
+Markdown et dans `diagram.mermaid` en JSON, avec sa provenance structurée. Les anciens
+diagnostics ne sont ni rescannés ni réécrits ; les signaux build/deploy et services
+non enregistrés à l’époque ne sont pas inventés. Aucun export PNG/SVG natif n’est ajouté.
+
+![Flux DevOps et panneau de traçabilité](docs/screenshots/flux-devops.png)
+
+
+## Analyser un dépôt distant
+
+Dans Diagnostic guidé → Scan technique ciblé, choisir **Dépôt distant**, le fournisseur,
+l’URL HTTPS, puis une branche/tag/SHA facultatif. Laisser la référence vide pour la branche
+par défaut. Pour un dépôt privé, saisir un jeton **GitLab read_api** ou **GitHub Contents
+Read-only**, avec Actions Read-only pour l’historique CI. Le jeton reste en mémoire ;
+**Effacer le jeton** le retire et un rechargement complet demande une nouvelle saisie.
+
+L’acquisition fige le SHA, vérifie les types Git et lit seulement les configurations
+actuelles et six manifests de racine. Ce mode conserve la façade scanner-v3 et les six règles à la racine ; il ne produit pas encore d’architecture multi-composants. Utiliser ZIP/local pour cette vue. GitHub Actions est uniquement une source de métadonnées historiques.
+Une archive bornée peut servir de fallback. Aucun clone, commit ou pipeline déclenché.
+Les hôtes autohébergés HTTPS publics sont acceptés ; les réseaux privés et certificats
+invalides sont refusés. Les acquisitions restent manuelles, sans ordonnanceur.
+
+Historique / Rapports présente au maximum dix commits et cinq exécutions disponibles
+pour le SHA analysé. Les durées absentes restent inconnues. Les métadonnées distantes
+sont stockées séparément des résultats figés et exclues des rapports Markdown/JSON.
+
+## Documentation web et PDF
+
+Depuis le projet ouvert, choisir **Documentation du projet** : liste des pages,
+éditeur Markdown, aperçu Mermaid strict, versions et restauration dans une nouvelle
+révision. La route `/projects/{id}/docs` fonctionne aussi directement. Une sauvegarde
+concurrente obsolète est refusée et la saisie est conservée. Les pages restent locales.
+
+Installer les moteurs PDF et Chromium :
+
+```bash
+python -m pip install -e '.[pdf]'
+python -m playwright install chromium
+```
+
+Les bibliothèques système peuvent être installées avec
+`python -m playwright install-deps chromium` (droits administrateur possibles).
+Sélectionner les pages, afficher leur ordre puis **Télécharger le PDF**. Playwright
+rend les diagrammes ; le fallback WeasyPrint remplace Mermaid par son code avec une
+mention explicite. Les ressources externes sont interdites dans les deux moteurs.
+
+Le PDF porte uniquement sur la documentation choisie. Les exports du diagnostic
+restent Markdown/JSON. Les pages documentaires sont du texte libre : vérifier leur
+contenu avant partage. Limites : 100 pages/projet, 256 Kio/page, 2 Mio/export.
+
+Guide pas à pas : [version web/Markdown](docs/guide-utilisation.md) ·
+[guide PDF](docs/guide-utilisation.pdf).
+
+Avant mise à jour, arrêter l’application et sauvegarder la base SQLite. La migration
+ajoute des tables sans réécrire les diagnostics historiques. Pour une nouvelle recette
+avec les PDF : `python -m pip install -e '.[dev,pdf]'`, installer Chromium puis lancer
+`python -m pytest -q`.
+
+
+## Interface et compréhension des contrôles
+
+Le projet ouvert et ses **Réglages** restent visibles en haut de l’écran. **Apparence** propose Système, Clair et Sombre, avec un accent bleu et des surfaces inspirées de GitHub. Les étapes du diagnostic restent librement accessibles et conservent la saisie pendant la session.
+
+**Comprendre les contrôles** explique les six contrôles disponibles : trois Dockerfile, un Compose et deux GitLab CI. Ce périmètre est un choix du produit, pas une norme. Le profil détermine les contrôles activés ; les filtres ne changent que l’affichage. Les références DOC/CMP/CI restent consultables dans les détails. Les seuils et priorités sont des conventions internes dont la justification méthodologique reste ouverte.
+
+![Diagnostic guidé, apparence sombre — données fictives](docs/screenshots/ergonomie-diagnostic-sombre.png)
+
+Le [guide d’utilisation](docs/guide-utilisation.md) détaille les parcours, les réglages et les limites.
+
+## Projeter le plan d’action dans Trello
+
+Trello est facultatif. L’application et le suivi local fonctionnent sans compte Trello.
+Pour activer les opérations Trello, fournir une clé API et un token avec les droits
+**read,write** dans l’environnement du processus, ou dans le seul fichier `.env`
+à la racine de devops-flow :
+
+```dotenv
+TRELLO_API_KEY=votre_cle_api
+TRELLO_TOKEN=votre_token
+```
+
+Les variables d’environnement priment, y compris lorsqu’elles sont vides. Le `.env`
+est déjà exclu de Git ; ne jamais y mettre les identifiants d’un dépôt audité.
+Le chargement n’effectue aucune recherche dans le dossier analysé. Les identifiants
+ne sont enregistrés ni en base ni dans le navigateur. Ils ne s’appliquent qu’à Trello,
+pas aux connecteurs GitLab/GitHub. Redémarrer l’application après modification de
+son environnement. [Créer une clé et autoriser un token Trello](https://developer.atlassian.com/cloud/trello/guides/rest-api/authorization/).
+
+Dans **Plan d’action**, sélectionner un diagnostic, puis :
+
+1. **Aperçu Trello** affiche le board, les listes, les cartes et les checklists,
+   sans appel réseau ni création. Cet aperçu reste disponible sans identifiants.
+2. **Tester la connexion** vérifie les identifiants et affiche le nom d’utilisateur.
+3. **Créer le board Trello** envoie les actions affichées vers un nouveau board privé
+   nommé `<nom du projet> — devops-flow`, sans workspace explicitement choisi.
+
+Les listes sont **À faire**, **En cours**, **Terminé**, **Écarté**. Les cartes suivent
+l’ordre local et le statut enregistré ; enregistrer son suivi avant l’aperçu. Chaque
+carte reçoit **Critères de vérification**, avec les critères du catalogue lorsqu’ils
+sont disponibles pour sa version, sinon **Preuve d’intégration fournie** et **Revue
+effectuée**. Tous les critères sont initialement non cochés, même pour une action
+terminée : son statut ne prouve pas qu’une vérification a été réalisée.
+
+L’envoi contient le nom du projet dans le nom du board, les recommandations,
+priorités, références d’actions/diagnostic et critères. Notes CALMS, commentaires,
+description du projet et contenus du dépôt ne sont pas envoyés.
+
+Un board déjà associé propose **Ajouter les nouvelles actions uniquement** ou
+**Recréer un nouveau board**. Une action est reconnue par son identifiant local,
+pas par son titre : un nouveau diagnostic peut donc ajouter des cartes de même titre.
+L’ajout ne modifie pas les cartes existantes, même déplacées, éditées ou supprimées
+manuellement. La recréation conserve les anciens boards et projette seulement le
+diagnostic sélectionné. Il n’existe aucune synchronisation inverse.
+
+Après interruption, **Reprendre la projection** utilise l’aperçu enregistré et
+complète les éléments manquants. Ne pas modifier les marqueurs devops-flow dans
+les descriptions pendant une projection incomplète : ils permettent de retrouver les
+créations dont la réponse s’est perdue. Si une création reste introuvable ou ambiguë,
+l’application suspend l’opération pour éviter un doublon ; vérifier Trello puis
+reprendre, ou choisir explicitement un nouveau board. Aucun rollback distant ni
+suppression automatique n’est effectué. Un board ou une liste archivé doit être
+rouvert dans Trello, ou remplacé par un nouveau board.
+
+Les erreurs d’identifiants et de permissions demandent une correction ; les erreurs
+temporaires de lecture sont réessayées avec backoff. Un 429 respecte `Retry-After`
+(10 secondes s’il manque) ; les attentes supérieures à 60 secondes affichent une date
+de reprise. Le service ne répète jamais aveuglément une création incertaine.
+
+
+La procédure et la matrice de détection multi-composants sont détaillées dans [Architecture DevOps](docs/ARCHITECTURE_DEVOPS.md).

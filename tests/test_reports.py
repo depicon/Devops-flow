@@ -10,10 +10,10 @@ import zipfile
 
 import pytest
 
-from devops_assist.calms import load_questionnaire
-from devops_assist.diagnostic import DiagnosticSnapshot, build_diagnostic
-from devops_assist.reports import build_export, render_json, render_markdown
-from devops_assist.scanner import scan_local, scan_zip, ScanError
+from devops_flow.calms import load_questionnaire
+from devops_flow.diagnostic import DiagnosticSnapshot, build_diagnostic
+from devops_flow.reports import build_export, render_json, render_markdown
+from devops_flow.scanner import scan_local, scan_zip, ScanError
 
 FIXTURES = Path(__file__).parent / "fixtures"
 DATE = datetime(2026, 10, 20, 12, tzinfo=timezone.utc)
@@ -114,10 +114,10 @@ def test_extra_context_fields_are_projected_out_without_loading_current_catalogs
         connection.execute("UPDATE diagnostics SET snapshot_json = ? WHERE id = ?", (json.dumps(data), saved.id))
     def forbidden(*args, **kwargs):
         pytest.fail("Recalcul ou catalogue courant appelé")
-    monkeypatch.setattr("devops_assist.diagnostic.build_diagnostic", forbidden)
-    monkeypatch.setattr("devops_assist.diagnostic.calculate_scores", forbidden)
-    monkeypatch.setattr("devops_assist.diagnostic.load_catalog", forbidden)
-    monkeypatch.setattr("devops_assist.diagnostic.load_questionnaire", forbidden)
+    monkeypatch.setattr("devops_flow.diagnostic.build_diagnostic", forbidden)
+    monkeypatch.setattr("devops_flow.diagnostic.calculate_scores", forbidden)
+    monkeypatch.setattr("devops_flow.diagnostic.load_catalog", forbidden)
+    monkeypatch.setattr("devops_flow.diagnostic.load_questionnaire", forbidden)
     diagnostic, actions = store.diagnostic_state(saved.project_id, saved.id)
     report = build_export(diagnostic, actions, exported_at=DATE)
     assert report.to_dict()["versions"]["recommendations"] == "recommendations-historical"

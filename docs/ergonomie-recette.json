@@ -1,0 +1,151 @@
+{
+  "parcours": {
+    "checks": [
+      "Création dédiée, erreur près du formulaire et contexte projet permanent",
+      "Questionnaire seul, saisie conservée entre étapes et apparences, sauvegarde explicite",
+      "Vrai transfert ZIP, analyse seule et diagnostic combiné ; trois résultats distincts",
+      "Diagramme lisible, SVG réel et accès au constat avec réinitialisation des filtres",
+      "Rapports Markdown/JSON réellement téléchargés ; lien historique vers le diagnostic exact",
+      "Création de profil sans identifiants à saisir et assignation explicite depuis les réglages",
+      "Documentation par route directe, contexte projet et rendu Mermaid",
+      "Mobile 390 px, bandeau visible, navigation clavier et textes au moins 14 px",
+      "Aucune requête externe ni erreur JavaScript ; diagnostics préexistants inchangés"
+    ],
+    "errors": [],
+    "external": [],
+    "metrics": [
+      {
+        "viewport": 1440,
+        "width": 1440,
+        "minFont": 14,
+        "screen": "Préparer sombre 1440"
+      },
+      {
+        "viewport": 1440,
+        "width": 1440,
+        "minFont": 14,
+        "screen": "Questionnaire clair 1440"
+      },
+      {
+        "viewport": 1440,
+        "width": 1440,
+        "minFont": 14,
+        "screen": "Réglages clair 1440"
+      },
+      {
+        "viewport": 390,
+        "width": 390,
+        "minFont": 14,
+        "screen": "Documentation clair 390"
+      },
+      {
+        "viewport": 390,
+        "width": 390,
+        "minFont": 14,
+        "screen": "Réglages clair 390"
+      },
+      {
+        "viewport": 390,
+        "width": 390,
+        "minFont": 14,
+        "screen": "Préparer sombre 390"
+      }
+    ]
+  },
+  "contrastes": [
+    {
+      "count": 27,
+      "min": 4.563748387142551,
+      "failures": [],
+      "theme": "Clair",
+      "step": "prepare",
+      "segment": 0
+    },
+    {
+      "count": 34,
+      "min": 4.563748387142551,
+      "failures": [],
+      "theme": "Clair",
+      "step": "questionnaire",
+      "segment": 0
+    },
+    {
+      "count": 29,
+      "min": 4.563748387142551,
+      "failures": [],
+      "theme": "Clair",
+      "step": "repository",
+      "segment": 0
+    },
+    {
+      "count": 31,
+      "min": 4.563748387142551,
+      "failures": [],
+      "theme": "Clair",
+      "step": "results",
+      "segment": 0
+    },
+    {
+      "count": 44,
+      "min": 4.563748387142551,
+      "failures": [],
+      "theme": "Clair",
+      "step": "results",
+      "segment": 1
+    },
+    {
+      "count": 31,
+      "min": 5.192060987927794,
+      "failures": [],
+      "theme": "Clair",
+      "step": "settings"
+    },
+    {
+      "count": 27,
+      "min": 5.192060987927794,
+      "failures": [],
+      "theme": "Sombre",
+      "step": "prepare",
+      "segment": 0
+    },
+    {
+      "count": 34,
+      "min": 5.192060987927794,
+      "failures": [],
+      "theme": "Sombre",
+      "step": "questionnaire",
+      "segment": 0
+    },
+    {
+      "count": 29,
+      "min": 5.192060987927794,
+      "failures": [],
+      "theme": "Sombre",
+      "step": "repository",
+      "segment": 0
+    },
+    {
+      "count": 31,
+      "min": 5.499751162610654,
+      "failures": [],
+      "theme": "Sombre",
+      "step": "results",
+      "segment": 0
+    },
+    {
+      "count": 44,
+      "min": 5.499751162610654,
+      "failures": [],
+      "theme": "Sombre",
+      "step": "results",
+      "segment": 1
+    },
+    {
+      "count": 31,
+      "min": 7.491836480293033,
+      "failures": [],
+      "theme": "Sombre",
+      "step": "settings"
+    }
+  ]
+}

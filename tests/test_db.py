@@ -6,12 +6,12 @@ import sqlite3
 from tempfile import TemporaryDirectory
 import unittest
 
-from devops_assist.db import ProjectStore
+from devops_flow.db import ProjectStore
 
 
 class ProjectStoreTests(unittest.TestCase):
     def setUp(self):
-        self.directory = TemporaryDirectory(prefix="devops-assist-db-")
+        self.directory = TemporaryDirectory(prefix="devops-flow-db-")
         self.addCleanup(self.directory.cleanup)
         self.db_path = Path(self.directory.name) / "data" / "projects.sqlite3"
         self.store = ProjectStore(self.db_path)

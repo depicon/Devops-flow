@@ -6,9 +6,9 @@ import sqlite3
 
 import pytest
 
-from devops_assist.db import ProjectStore
-from devops_assist.diagnostic import build_diagnostic
-from devops_assist.roadmap import STATUS_LABELS
+from devops_flow.db import ProjectStore
+from devops_flow.diagnostic import build_diagnostic
+from devops_flow.roadmap import STATUS_LABELS
 
 
 @pytest.fixture

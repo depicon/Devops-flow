@@ -4,10 +4,10 @@ from pathlib import Path
 
 import pytest
 
-from devops_assist.calms import calculate_scores, load_questionnaire
-from devops_assist.diagnostic import DiagnosticSnapshot, build_diagnostic, calms_findings
-from devops_assist.rules import evaluate_files
-from devops_assist.scanner import ScanResult, scan_local, ScanError
+from devops_flow.calms import calculate_scores, load_questionnaire
+from devops_flow.diagnostic import DiagnosticSnapshot, build_diagnostic, calms_findings
+from devops_flow.rules import evaluate_files
+from devops_flow.scanner import ScanResult, scan_local, ScanError
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -117,8 +117,8 @@ def test_deterministic_snapshot_copies_inputs_and_keeps_versions():
     assert len(first.to_dict()["findings"]) == 11
     assert first.to_dict()["inputs"]["calms"]["C1"] == 0
     assert first.to_dict()["versions"] == {
-        "engine": "diagnostic-engine-v1", "questionnaire": "calms-v1", "rules": "rules-v2",
-        "scanner": "scanner-v2", "recommendations": "recommendations-v1",
+        "engine": "diagnostic-engine-v1", "questionnaire": "calms-v1", "rules": "rules-v3",
+        "scanner": "scanner-v3", "recommendations": "recommendations-v1",
     }
     restored = DiagnosticSnapshot.from_json(first.to_json())
     assert restored.to_json() == first.to_json()
@@ -132,8 +132,8 @@ def test_historical_scan_versions_remain_readable_without_recalculation(store, m
     saved = store.save_diagnostic(project.id, "historical-v1", historical)
     def forbidden(*args, **kwargs):
         pytest.fail("Un diagnostic historique a été recalculé")
-    monkeypatch.setattr("devops_assist.rules.evaluate_files", forbidden)
-    monkeypatch.setattr("devops_assist.scanner.scan_local", forbidden)
+    monkeypatch.setattr("devops_flow.rules.evaluate_files", forbidden)
+    monkeypatch.setattr("devops_flow.scanner.scan_local", forbidden)
     reloaded = store.get_diagnostic(project.id, saved.id)
     assert reloaded.snapshot.to_dict() == original
     assert reloaded.snapshot.to_dict()["versions"]["rules"] == "rules-v1"

@@ -1,0 +1,39 @@
+{
+  "checks": [
+    "Upload ZIP réel, deux composants, stacks et relations, clair/sombre, aucun contenu brut visible",
+    "Diagnostic-v3 figé, Mermaid réel, quatre relations et lien vers le bon constat",
+    "Téléchargements Markdown/JSON réels, même date, chemins relatifs, exclusions respectées",
+    "Déclaration persistante, résultat courant invalidé puis rescanné, diagnostic antérieur identique",
+    "Mobile 390px sans débordement global, textes >=14px et navigation clavier",
+    "Déclaration retrouvée après rechargement complet du navigateur",
+    "Historique racine lisible sans recalcul, aucune requête externe ni erreur JavaScript"
+  ],
+  "metrics": {
+    "width": 390,
+    "body": 390,
+    "minimumFont": 14
+  },
+  "errors": [],
+  "external": [],
+  "contrast": {
+    "light": {
+      "samples": 91,
+      "minimumContrast": 4.563748387142551,
+      "minimumFont": 14,
+      "failures": 0
+    },
+    "dark": {
+      "samples": 91,
+      "minimumContrast": 5.192060987927794,
+      "minimumFont": 14,
+      "failures": 0
+    },
+    "mobile": {
+      "samples": 91,
+      "minimumContrast": 5.192060987927794,
+      "minimumFont": 14,
+      "failures": 0
+    },
+    "keyboardSteps": 12
+  }
+}

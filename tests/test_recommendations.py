@@ -2,11 +2,11 @@ from dataclasses import replace
 
 import pytest
 
-from devops_assist.diagnostic import build_diagnostic
-from devops_assist.models import Finding, TECHNICAL_RULE_IDS
-from devops_assist.recommendations import load_catalog, recommend
-from devops_assist.rules import evaluate_files
-from devops_assist.scanner import ScanResult, scan_zip
+from devops_flow.diagnostic import build_diagnostic
+from devops_flow.models import Finding, TECHNICAL_RULE_IDS
+from devops_flow.recommendations import load_catalog, recommend
+from devops_flow.rules import evaluate_files
+from devops_flow.scanner import ScanResult, scan_zip
 
 
 def finding(rule, status, id=None):

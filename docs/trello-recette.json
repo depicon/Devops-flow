@@ -1,0 +1,62 @@
+{
+  "checks": [
+    "Aperçu sans réseau avec checklist visible",
+    "Apparences clair/sombre",
+    "Connexion et création : 1 board, 4 listes, 5 cartes, 10 critères",
+    "Ajout vide sans doublon",
+    "Recréation volontaire, ancien board conservé",
+    "Mobile390, activation clavier, textes >=14px",
+    "Snapshots identiques, zéro requête externe et erreur JavaScript"
+  ],
+  "stats": {
+    "calls": 55,
+    "boards": 2,
+    "lists": 8,
+    "cards": 10,
+    "checklists": 10,
+    "items": 20,
+    "project": "bc634bf7-536e-4068-bd69-8270bdaeac37"
+  },
+  "errors": [],
+  "external": [],
+  "contrast": [
+    {
+      "theme": "Clair",
+      "segment": "header",
+      "count": 35,
+      "min": 4.563748387142551,
+      "failures": []
+    },
+    {
+      "theme": "Clair",
+      "segment": "preview",
+      "count": 40,
+      "min": 4.563748387142551,
+      "failures": []
+    },
+    {
+      "theme": "Sombre",
+      "segment": "header",
+      "count": 35,
+      "min": 5.499751162610654,
+      "failures": []
+    },
+    {
+      "theme": "Sombre",
+      "segment": "preview",
+      "count": 40,
+      "min": 5.499751162610654,
+      "failures": []
+    },
+    {
+      "theme": "Sombre",
+      "segment": "mobile390",
+      "count": 23,
+      "min": 7.491836480293033,
+      "failures": []
+    }
+  ],
+  "contrast_samples": 173,
+  "reload": "Board retrouvé et aperçu sans nouvel appel API après rechargement",
+  "scope": "Linux/Chromium, base fictive et Trello simulé ; aucun compte réel"
+}

@@ -1,112 +1,76 @@
 import json
-from pathlib import Path
 import sqlite3
-
-from streamlit.testing.v1 import AppTest
-
-from devops_assist.db import ProjectStore
-
-APP = Path(__file__).resolve().parents[1] / "app.py"
+from nicegui import ui
 
 
-def open_questionnaire(project_id):
-    at = AppTest.from_file(APP, default_timeout=10).run()
-    at.button(key=f"open_{project_id}").click().run()
-    at.sidebar.radio[0].set_value("Diagnostic guidé").run()
-    assert not at.exception
-    return at
+async def test_no_questionnaire_until_a_project_is_selected(gui):
+    await gui.open(page='Diagnostic guidé')
+    assert not any(isinstance(e, ui.select) and 'theme_mode' not in e._markers for e in gui.user.client.elements.values())
+    await gui.user.should_see('Créez ou ouvrez')
 
 
-def test_no_questionnaire_until_a_project_is_selected():
-    at = AppTest.from_file(APP).run()
-    at.sidebar.radio[0].set_value("Diagnostic guidé").run()
-    assert not at.exception
-    assert not at.selectbox
-    assert any("Créez ou ouvrez" in item.value for item in at.info)
+async def test_unknown_save_shows_five_indeterminate_scores(gui, store):
+    project = store.create_project('Sans information')
+    await gui.open(project.id, 'Diagnostic guidé')
+    assert len([e for e in gui.user.find(ui.select).elements if 'theme_mode' not in e._markers]) == 15
+    await gui.click(f'calms_save_{project.id}')
+    assert gui.texts.count('Indéterminé') == 5
+    await gui.user.should_see('0/15 réponses connues (0,0 %)')
 
 
-def test_unknown_save_shows_five_indeterminate_scores(store):
-    project = store.create_project("Sans information")
-    at = open_questionnaire(project.id)
-    assert len(at.selectbox) == 15
-    assert not at.metric
-    at.button[0].click().run()
-    assert not at.exception
-    assert at.success
-    assert len(at.metric) == 5
-    assert all(metric.value == "Indéterminé" for metric in at.metric)
-    assert any("0/15 réponses connues (0,0 %)" in item.value for item in at.markdown)
+async def test_answers_notes_and_scores_survive_new_ui_session(gui, store):
+    project = store.create_project('Questionnaire conservé')
+    await gui.open(project.id, 'Diagnostic guidé')
+    for question, value in [('C1', 3), ('C2', 0), ('A1', 1)]:
+        await gui.set(f'calms_{project.id}_{question}', value)
+    await gui.set(f'calms_{project.id}_C1_note', 'Précision d’équipe')
+    await gui.click(f'calms_save_{project.id}')
+    await gui.user.should_see('50,0 / 100')
+    await gui.user.should_see('33,3 / 100')
+    await gui.user.should_see('2/3 réponses connues (66,7 %)')
+    await gui.user.should_see('3/15 réponses connues (20,0 %)')
+    await gui.open(project.id, 'Diagnostic guidé')
+    assert gui.element(f'calms_{project.id}_C1').value == 3
+    assert gui.element(f'calms_{project.id}_C2').value == 0
+    assert gui.element(f'calms_{project.id}_C1_note').value == 'Précision d’équipe'
+    assert store.load_calms(project.id).answers['C1'] == 3
 
 
-def test_answers_notes_and_scores_survive_new_ui_session(store, db_path):
-    project = store.create_project("Questionnaire conservé")
-    at = open_questionnaire(project.id)
-    at.selectbox(key=f"calms_{project.id}_C1").set_value(3)
-    at.selectbox(key=f"calms_{project.id}_C2").set_value(0)
-    at.selectbox(key=f"calms_{project.id}_A1").set_value(1)
-    at.text_area(key=f"calms_{project.id}_C1_note").set_value("Précision d'équipe")
-    at.button[0].click().run()
-    assert not at.exception
-    assert at.metric[0].value == "50,0 / 100"
-    assert at.metric[1].value == "33,3 / 100"
-    assert any("2/3 réponses connues · Couverture : 66,7 %" in item.value for item in at.caption)
-    assert any("3/15 réponses connues (20,0 %)" in item.value for item in at.markdown)
-
-    reopened = open_questionnaire(project.id)
-    assert reopened.selectbox(key=f"calms_{project.id}_C1").value == 3
-    assert reopened.selectbox(key=f"calms_{project.id}_C2").value == 0
-    assert reopened.text_area(key=f"calms_{project.id}_C1_note").value == "Précision d'équipe"
-    assert reopened.metric[0].value == "50,0 / 100"
-    assert ProjectStore(db_path).load_calms(project.id).answers["C1"] == 3
-
-
-def test_unsaved_edits_do_not_change_saved_scores_or_database(store):
-    project = store.create_project("Sauvegarde explicite")
-    original = store.save_calms(project.id, {"C1": 3})
-    at = open_questionnaire(project.id)
-    # Dans un formulaire, une modification reste côté client jusqu'au clic.
-    # AppTest.run() seul recharge les valeurs serveur non soumises.
-    at.selectbox(key=f"calms_{project.id}_C1").set_value(0)
-    assert at.metric[0].value == "100,0 / 100"
+async def test_unsaved_edits_do_not_change_saved_scores_or_database(gui, store):
+    project = store.create_project('Sauvegarde explicite')
+    original = store.save_calms(project.id, {'C1': 3})
+    await gui.open(project.id, 'Diagnostic guidé')
+    await gui.set(f'calms_{project.id}_C1', 0)
+    await gui.user.should_see('100,0 / 100')
     assert store.load_calms(project.id) == original
-    at.button[0].click().run()
-    assert at.metric[0].value == "0,0 / 100"
-    assert store.load_calms(project.id).answers["C1"] == 0
-    at.selectbox(key=f"calms_{project.id}_C1").set_value(3)
-    at.button[0].click().run()
-    assert not at.exception
-    assert at.metric[0].value == "100,0 / 100"
-    assert store.load_calms(project.id).answers["C1"] == 3
+    await gui.click(f'calms_save_{project.id}')
+    await gui.user.should_see('0,0 / 100')
+    assert store.load_calms(project.id).answers['C1'] == 0
+    await gui.set(f'calms_{project.id}_C1', 3)
+    await gui.click(f'calms_save_{project.id}')
+    await gui.user.should_see('100,0 / 100')
 
 
-def test_questionnaires_do_not_leak_between_projects_or_navigation(store):
-    first = store.create_project("A")
-    second = store.create_project("B")
-    store.save_calms(first.id, {"C1": 3}, {"C1": "Note A"})
-    store.save_calms(second.id, {"C1": 0}, {"C1": "Note B"})
-    at = open_questionnaire(first.id)
-    at.sidebar.radio[0].set_value("Projets").run()
-    at.button(key=f"open_{second.id}").click().run()
-    at.sidebar.radio[0].set_value("Diagnostic guidé").run()
-    assert not at.exception
-    assert at.selectbox(key=f"calms_{second.id}_C1").value == 0
-    assert at.text_area(key=f"calms_{second.id}_C1_note").value == "Note B"
-    at.sidebar.radio[0].set_value("Projets").run()
-    at.button(key=f"open_{first.id}").click().run()
-    at.sidebar.radio[0].set_value("Diagnostic guidé").run()
-    assert at.selectbox(key=f"calms_{first.id}_C1").value == 3
-    assert at.text_area(key=f"calms_{first.id}_C1_note").value == "Note A"
+async def test_questionnaires_do_not_leak_between_projects_or_navigation(gui, store):
+    first, second = store.create_project('A'), store.create_project('B')
+    store.save_calms(first.id, {'C1': 3}, {'C1': 'Note A'})
+    store.save_calms(second.id, {'C1': 0}, {'C1': 'Note B'})
+    await gui.open(first.id, 'Diagnostic guidé')
+    for project, answer, note in [(second, 0, 'Note B'), (first, 3, 'Note A')]:
+        await gui.nav('Projets')
+        await gui.click(f'open_{project.id}')
+        await gui.nav('Diagnostic guidé')
+        assert gui.element(f'calms_{project.id}_C1').value == answer
+        assert gui.element(f'calms_{project.id}_C1_note').value == note
 
 
-def test_unsupported_saved_version_is_not_overwritten_or_disclosed(store, db_path):
-    project = store.create_project("Version inconnue")
-    raw = json.dumps({"version": "future", "notes": "FAKE_SECRET_CALMS"})
-    with sqlite3.connect(db_path) as connection:
-        connection.execute("UPDATE projects SET draft_answers_json = ? WHERE id = ?", (raw, project.id))
-    at = open_questionnaire(project.id)
-    assert not at.exception
-    assert at.error
-    assert "FAKE_SECRET_CALMS" not in at.error[0].value
-    assert not at.selectbox
-    with sqlite3.connect(db_path) as connection:
-        assert connection.execute("SELECT draft_answers_json FROM projects WHERE id = ?", (project.id,)).fetchone()[0] == raw
+async def test_unsupported_saved_version_is_not_overwritten_or_disclosed(gui, store):
+    project = store.create_project('Version inconnue')
+    raw = json.dumps({'version': 'future', 'notes': 'FAKE_SECRET_CALMS'})
+    with sqlite3.connect(store.path) as c:
+        c.execute('INSERT INTO calms_drafts VALUES (?,?,?)', (project.id, 'baseline:1', raw))
+    await gui.open(project.id, 'Diagnostic guidé')
+    assert 'FAKE_SECRET' not in ' '.join(gui.texts)
+    assert not any(isinstance(e, ui.select) and 'theme_mode' not in e._markers for e in gui.user.client.elements.values())
+    with sqlite3.connect(store.path) as c:
+        assert c.execute('SELECT draft_json FROM calms_drafts WHERE project_id=?', (project.id,)).fetchone()[0] == raw

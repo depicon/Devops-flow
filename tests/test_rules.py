@@ -3,7 +3,7 @@ import json
 
 import pytest
 
-from devops_assist.rules import (
+from devops_flow.rules import (
     CI_RESERVED, InvalidConfiguration, _yaml_document, evaluate_files,
 )
 

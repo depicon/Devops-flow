@@ -2,10 +2,10 @@ import json
 
 import pytest
 
-from devops_assist.calms import (
+from devops_flow.calms import (
     CalmsDraft, UNKNOWN, calculate_scores, load_questionnaire, normalize_answers,
 )
-from devops_assist.db import ProjectStore
+from devops_flow.db import ProjectStore
 
 
 def test_versioned_catalogue_has_fifteen_unique_questions_in_five_dimensions():

@@ -1,0 +1,67 @@
+{
+  "checks": [
+    "Nom du bandeau/titre et état vide",
+    "Ancienne préférence reprise et nouvelle préférence prioritaire",
+    "Démo chargée et ZIP réellement téléchargé sous le nouveau nom",
+    "Diagnostic et diagramme Mermaid rendus",
+    "Plan d’action et aperçu Trello renommé sans appel externe",
+    "Historique et téléchargements Markdown/JSON réels renommés",
+    "Sombre, mobile 390px sans débordement et préférence persistante"
+  ],
+  "javascript_errors": [],
+  "external_requests": [],
+  "viewport_mobile": 390,
+  "base": "fictive dans /tmp",
+  "launch": "python -m devops_flow",
+  "app_entrypoint": {
+    "launch": "python app.py",
+    "http_status": 200,
+    "browser_title": "devops-flow",
+    "spaces": 4,
+    "javascript_errors": [],
+    "database": "fictive distincte dans /tmp/devops-flow-app-entrypoint"
+  },
+  "suite": {
+    "command": "PLAYWRIGHT_BROWSERS_PATH=/tmp/devops-flow-playwright .venv/bin/python -m pytest -q",
+    "result": "842 passed, 6 subtests passed in 115.63s (0:01:55)",
+    "exit_code": 0
+  },
+  "screenshots": [
+    "projets.png",
+    "diagnostic.png",
+    "flux-devops.png",
+    "plan-action.png",
+    "historique.png",
+    "ergonomie-diagnostic-sombre.png",
+    "ergonomie-reglages.png",
+    "ergonomie-mobile.png"
+  ],
+  "guide_capture_viewports": {
+    "desktop": [
+      1440,
+      1000
+    ],
+    "mobile": [
+      390,
+      844
+    ]
+  },
+  "notes": "Données fictives uniquement ; ancienne préférence navigateur reprise ; aucun compte Trello réel ni nouvelle mesure exhaustive de contraste.",
+  "guide_pdf": {
+    "title": "devops-flow — Guide d’utilisation",
+    "pages": 11,
+    "size_bytes": 355022,
+    "format": "A4",
+    "javascript": false,
+    "encrypted": false,
+    "warnings": []
+  },
+  "checks_static": {
+    "local_document_links": 42,
+    "legacy_imports_ast": 0,
+    "compileall_exit_code": 0,
+    "pip_check": "No broken requirements found",
+    "git_diff_check_exit_code": 0,
+    "embedded_data_identical": true
+  }
+}

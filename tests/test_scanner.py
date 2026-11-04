@@ -12,8 +12,8 @@ import zipfile
 
 import pytest
 
-from devops_assist import scanner
-from devops_assist.scanner import (
+from devops_flow import scanner
+from devops_flow.scanner import (
     ALLOWED_NAMES, DEFAULT_LIMITS, MIB, ScanError, _read_bounded, scan_local, scan_zip,
 )
 
